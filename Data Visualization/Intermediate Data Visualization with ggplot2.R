@@ -1,9 +1,10 @@
-# 
+#
 # Title:    Intermediate Data Visualization with ggplot2
 # Purpose:  Code for Statistics Layer section of Data Visualization
-# Author:   Billy Caughey 
-# Date:     2020.08.06 - Initial build 
+# Author:   Billy Caughey
+# Date:     2020.08.06 - Initial build
 #           2020.08.08 - Still learning
+#           2020.08.14 - Facets
 #
 
 ##### Libraries #####
@@ -53,7 +54,7 @@ ggplot(mtcars, aes(x = wt, y = mpg, color = fcyl)) +
 
 ##### Modifying stat_smooth #####
 
-# Explore the effect of span argument on the LOESS curve 
+# Explore the effect of span argument on the LOESS curve
 
 ggplot(mtcars, aes(x = wt, y = mpg)) +
     geom_point() +
@@ -104,13 +105,13 @@ ggplot(Vocab, aes(x = education, y = vocabulary, color = year_group)) +
 
 # Map the 5th, 50th, and 95th quantile
 
-ggplot(Vocab, aes(x = education, y = vocabulary)) + 
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
     geom_jitter(alpha = 0.25) +
     stat_quantile(quantiles = c(0.05, 0.5, 0.95))
 
-# Plot year_group 
+# Plot year_group
 
-ggplot(Vocab, aes(x = education, y = vocabulary, color = year_group)) + 
+ggplot(Vocab, aes(x = education, y = vocabulary, color = year_group)) +
     geom_jitter(alpha = 0.25) +
     stat_quantile(quantiles = c(0.05, 0.5, 0.95))
 
@@ -167,11 +168,11 @@ p_wt_vs_fcyl_by_fam +
 p_wt_vs_fcyl_by_fam +
     geom_point(position = posn_j)
 
-# Add dodging only 
+# Add dodging only
 p_wt_vs_fcyl_by_fam +
     geom_point(position = posn_d)
 
-# Add jittering and dodging only 
+# Add jittering and dodging only
 p_wt_vs_fcyl_by_fam +
     geom_point(position = posn_jd)
 
@@ -179,19 +180,19 @@ p_wt_vs_fcyl_by_fam +
 
 p_wt_vs_fcyl_by_fam_jit +
     # Add a summary stat of std deviation limits
-    stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), position = posn_d) 
+    stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), position = posn_d)
 
 p_wt_vs_fcyl_by_fam_jit +
     # Add a summary stat of std deviation limits
-    stat_summary(fun.data = mean_sdl, 
-                 fun.args = list(mult = 1), 
+    stat_summary(fun.data = mean_sdl,
+                 fun.args = list(mult = 1),
                  position = posn_d,
-                 geom = "errorbar") 
+                 geom = "errorbar")
 
 p_wt_vs_fcyl_by_fam_jit +
     # Add a summary stat of std deviation limits
-    stat_summary(fun.data = mean_sdl, 
-                 fun.args = list(mult = 1), 
+    stat_summary(fun.data = mean_sdl,
+                 fun.args = list(mult = 1),
                  position = posn_d,
                  geom = "errorbar") +
     stat_summary(fun.data = mean_cl_normal,
@@ -208,13 +209,13 @@ ggplot(mtcars, aes(x = wt, y = hp, color = fam)) +
 # Add a continuous x scale from 3 to 6
     scale_x_continuous(limits = c(3, 6))
 
-# Update the plot by adding a Cartesian coordinate system with x limits 
+# Update the plot by adding a Cartesian coordinate system with x limits
 
 ggplot(mtcars, aes(x = wt, y = hp, color = fam)) +
     geom_point() +
     geom_smooth() +
     coord_cartesian(xlim = c(3,6))
-    
+
 ## Aspect Ratio I: 1:1 Ratios ##
 
 ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
@@ -331,7 +332,7 @@ secondary_y_axis <- sec_axis(
 # Update the plot
 ggplot(airquality, aes(Date, Temp)) +
     geom_line() +
-    # Add the secondary y-axis 
+    # Add the secondary y-axis
     scale_y_continuous(sec.axis = secondary_y_axis) +
     labs(x = "Date (1973)", y = "Fahrenheit")
 
@@ -350,7 +351,7 @@ ggplot(mtcars, aes(fcyl, fill = fam)) +
     geom_bar(position = "dodge") +
     coord_flip()
 
-# partially overlapping bars 
+# partially overlapping bars
 
 ggplot(mtcars, aes(fcyl, fill = fam)) +
     # Set a dodge width of 0.5 for partially overlapping bars
@@ -403,7 +404,7 @@ ggplot(wind, aes(wd, fill = ws)) +
 
 ## Facet layer basics ##
 
-ggplot(mtcars, aes(wt, mpg)) + 
+ggplot(mtcars, aes(wt, mpg)) +
     geom_point() +
     # Facet rows by am
     facet_grid(rows = vars(am), cols = vars(cyl))
@@ -431,33 +432,19 @@ ggplot(mtcars, aes(x = wt, y = mpg, color = fcyl_fam, size = disp)) +
     # Grid facet on gear and vs
     facet_grid(rows = vars(gear), cols = vars(vs))
 
-# Formula Notation 
+# Formula Notation
 
-ggplot(mtcars, aes(wt, mpg)) + 
+ggplot(mtcars, aes(wt, mpg)) +
     geom_point() +
     # Facet rows by am using formula notation
     facet_grid(am ~ .)
 
-ggplot(mtcars, aes(wt, mpg)) + 
+ggplot(mtcars, aes(wt, mpg)) +
     geom_point() +
     # Facet rows by am using formula notation
     facet_grid(. ~ cyl)
 
-ggplot(mtcars, aes(wt, mpg)) + 
+ggplot(mtcars, aes(wt, mpg)) +
     geom_point() +
     # Facet rows by am and columns by cyl using formula notation
     facet_grid(am ~ cyl)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
