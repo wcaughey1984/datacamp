@@ -1,0 +1,453 @@
+---
+title: "Chapter 2 Names and Values"
+author: "Billy Caughey"
+date: "8/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+set.seed(1014)
+
+library(lobstr)
+
+```
+
+# Chapter 2.1 Introduction
+
+## Quiz 
+
+### Question 1
+
+_Given the following data frame, how do I create a new column called “3” that contains the sum of 1 and 2? You may only use $, not [[. What makes 1, 2, and 3 challenging as variable names?_
+
+```{r}
+
+df <- data.frame(runif(3), runif(3))
+names(df) <- c(1, 2)
+
+df$`3` <- df$`1` + df$`2`
+
+print(df)
+
+```
+
+Using the variable names of 1, 2, and 3 are hard because variables should not start with numbers. Additionally, bracket notation becomes difficult.
+
+### Question 2
+
+_In the following code, how much memory does `y` occupy?_
+
+```{r}
+# old solution
+x <- runif(1e6)
+
+y <- list(x, x, x)
+
+object.size(y)
+
+#new solution
+
+library(lobstr)
+obj_size(y)
+
+```
+
+### Question 3 
+
+_On which line does `a` get copied in the following example?_
+
+Old answer: `a` is copied in the second line when it is copied into `b`.
+New Answer: `a` is copied in the third line using the _copy on modify_ principle.
+
+```{r}
+
+a <- c(1, 5, 3, 2)
+b <- a
+b[[1]]
+
+```
+
+## 2.2 Binding Basics 
+
+Consider the following:
+
+```{r}
+
+x <- c(1,2,3)
+y <- x
+
+obj_addr(x)
+obj_addr(y)
+
+```
+
+### 2.2.1 Non-syntactic Names
+
+Non-syntactic names are names that:
+
+* Start with a '_' or digit
+* A reserved word with the use of backticks (`)
+
+I can get around the non-syntatic names by using the backtips. This is __not__ recommended. In fact, it's down right discouraged.
+
+In fact, the following code chunks won't run in markdown (I'm not going to change the options):
+
+* `_abc <- 1`: This is non-syntatic because it starts with a '_'.
+* `if <- 10`: This is trying to bind the value 10 to the keyword __if__.
+
+### 2.2.2 Exercises
+
+#### Question 1
+
+_Explain the relationship between `a`, `b`, `c`, and `d` in the following code:
+
+```{r}
+
+a <- 1:10
+b <- a
+c <- b
+d <- 1:10
+
+```
+
+First, a numeric vector, `1:10` is bound to `a`. Then, `b` is bound to `1:10`. In the third line, `c` is bound to `1:10`. The final line sees the variable `d` bound to a different vector of `1:10`.
+
+#### Question 2
+
+_The following code accesses the mean function in multiple ways. Do they all point to the same underlying function object? Verify this with `lobstr::obj_addr()`_.
+
+```{r}
+
+obj_addr(mean)
+obj_addr(base::mean)
+obj_addr(get("mean"))
+obj_addr(evalq(mean))
+obj_addr(match.fun("mean"))
+
+```
+
+Yes, `obj_addr` calls the same __mean__ object.
+
+#### Question 3
+
+_By default, base R data import functions,like __read.csv()__, will automatically convert non-syntactic names to syntactic ones. Why might this be problematic. What option allows you to suppress this behaviour?
+
+This is problematic because it could change the meaning of the name. Naming conventions matter. When naming conventions in a CSV are changed, meaning could be lost if a data dictionary is not found.
+
+Within the `read.csv` function, there is an argument that allows the user to user their own field names. Additionally, it is entirely possible to rename the variable names once read in.
+
+## 2.3 Copy-on-modify
+
+Consider the following code:
+
+```{r}
+
+x <- c(1,2,3)
+y <- x
+
+obj_addr(x)
+obj_addr(y)
+
+y[[3]] <- 4
+obj_addr(y)
+
+```
+
+Notice how x and y have the same address initially? This is because the line `x <- c(1,2,3)` creates a vector of 1, 2, and 3 then binds it x. The next line, `y <- x`, binds the same vector to y. Essentially, the vector of 1, 2, and 3 has TWO names it can be called by now. Once I make a modification, line `y[[3]] <- 4`, R creates a new vector of 1, 2, and 4 and binds that vector to y. This behavior is called __copy-on-modify__.
+
+### 2.3.1 tracemem()
+
+I can use the `tracemem()` function to see when an object is copied.
+
+Consider the following code:
+
+```{r}
+
+x <- c(1, 2, 3)
+cat(tracemem(x), "\n")
+
+y <- x
+y[[3]] <- 4
+
+```
+
+Notice how it states [location] -> [location]? This is telling me that R has made a copy and where it's new address is.
+
+Also make sure to use the `untracemem()` function, or I'll keep getting the address calls.
+
+```{r}
+
+untracemem(x)
+
+```
+
+### 2.3.2 Function calls 
+
+The same __copy-on-modify__ behavior exists in functions as well. Consider the following code:
+
+```{r}
+
+f <- function(a) {
+    a
+}
+
+x <- c(1,2,3)
+cat(tracemem(x), "\n")
+
+z <- f(x)
+
+untracemem(x)
+
+```
+
+There isn't a copy made in the line `z <- f(x)`, hence R doesn't suggest anything has happened.
+
+### 2.3.3 Lists 
+
+I shouldn't be naive enough to believe that only names (e.g., variables) point to values; elements of lists do to! Consider the following code:
+
+```{r}
+
+l1 <- list(1, 2, 3)
+l2 <- l1
+ref(l1, l2)
+
+l2[[3]] <- 4
+ref(l1, l2)
+
+```
+
+The schematic looks a bit interesting, but lets walk through it. First, when I bind the list of `list(1,2,3)` to l1 and l2, all the elements of those lists are in the same location. When I make a modification, look what happens. Only the third element of list `l2` changes address. This is because it has been modified.
+
+### 2.3.4 Data frames 
+
+Data frames are lists of vectors, so __copy-on-modify__ has important consequences when you modify a data frame. Consider the following code:
+
+```{r}
+
+d1 <- data.frame(x = c(1, 5, 6), y = c(2, 4, 3))
+d2 <- d1
+ref(d1, d2)
+
+d2[, 2] <- d2[, 2] * 2
+ref(d1, d2)
+
+```
+
+The same result that we saw in the list example is occuring in this example.
+
+Now, the question is what happens if I modify every row instead of a single column? Let's find out:
+
+```{r}
+
+d3 <- d1
+d3[1, ] <- d3[1, ] * 3
+
+ref(d1, d3)
+
+```
+
+In this case, both fields in `d3` have been modified so they have new addresses.
+
+### 2.3.5 Character vectors 
+
+R uses references with character vectors as well. Consider the following:
+
+```{r}
+
+x <- c("a", "a", "abc", "d")
+ref(x, character = TRUE)
+
+```
+
+It is important to note that R actually has a __global string pool__ that it binds variables to. That is why `"a"` has the same address for both elements. 
+
+### 2.3.6 Exercises 
+
+#### Question 1
+
+_Why is `tracemem(1:10)` not useful?_
+
+`tracemem(1:10)` isn't useful because each time I run this code, a different vector of 1, 2, 3, ... , 10 is created. That would mean new addresses each time I ran it.
+
+```{r}
+
+tracemem(1:10)
+tracemem(1:10)
+
+```
+
+#### Question 2 
+
+_Explain why tracemem() shows two copies when you run this code. Hint: carefully look at the difference between this code and the code shown earlier in this section._
+
+Consider the code:
+
+```{r}
+
+x <- c(1L, 2L, 4L)
+tracemem(x)
+
+x[[3]] <- 4
+untracemem(x)
+
+```
+
+The reason for the change is I'm changing from an integer of `4L` to a double in `4`.
+
+#### Question 3
+
+_Sketch out the relationship between the following objects._
+
+```{r} 
+
+a <- 1:10
+b <- list(a, a)
+c <- list(b, a, 1:10)
+
+ref(a, b, c)
+
+```
+
+#### Question 4 
+
+_What happens when you run this code? Draw a picture._
+
+I am binding the second element of `x` to the list `x` is bound to.
+
+```{r}
+
+x <- list(1:10)
+x[[2]] <- x
+
+ref(x)
+
+x
+
+```
+
+## 2.4 Object Size 
+
+I can use the function `obj_size()` to find out how much memory an object takes.
+
+```{r}
+
+obj_size(letters)
+obj_size(ggplot2::diamonds)
+
+```
+
+Since lists are references to values, the size of the list might be smaller than I think.
+
+```{r}
+
+x <- runif(1e6)
+obj_size(x)
+
+y <- list(x, x, x)
+obj_size(y)
+
+```
+
+With characters, since R uses the global string pool, the character vectors take up less memory than I think.
+
+```{r}
+
+banana <- "bananas bananas bananas"
+obj_size(banana)
+
+obj_size(rep(banana, 100))
+
+```
+
+One word of caution: `obj_size(x) + obj_size(y) = obj_size(x, y)` __IF THEY DON'T HAVE COMMON VALUES__.
+
+```{r}
+
+obj_size(x, y)
+
+x <- c(1, 2, 4)
+obj_size(x)
+y <- c(5, 6, 7)
+obj_size(y)
+obj_size(x, y)
+
+```
+
+### 2.4.1 Exercises 
+
+#### Question 1 
+
+_In the following example, why are `object.size()` and `obj_size()` so radically different? Consult the documentation of `object.size()`._
+
+```{r}
+
+y <- rep(list(runif(1e4)), 100)
+
+object.size(y)
+obj_size(y)
+
+```
+
+`obj_size` is considering the memory allocation for y and all the nuances of ALTREP. `object.size` brute forces the size without nuances.
+
+#### Question 2
+
+_Take the following list. Why is its size somewhat misleading?_
+
+```{r}
+
+funs <- list(mean, sd, var)
+obj_size(funs)
+
+obj_size(mean)
+obj_size(sd)
+obj_size(var)
+
+```
+
+It's misleading because the `obj_size` isn't the sum of it's parts. These are three functions, but `sd` and `var` call `mean`. With those calls, the actual memory allocation needed is smaller than the some of it's parts.
+
+#### Question 3
+
+_Predict the output of the following code:_
+
+```{r}
+
+a <- runif(1e6)
+obj_size(a)
+
+b <- list(a, a)
+obj_size(b)
+obj_size(a, b)
+
+b[[1]][[1]] <- 10
+obj_size(b)
+obj_size(a, b)
+
+b[[2]][[1]] <- 10
+obj_size(b)
+obj_size(a, b)
+
+```
+
+## 2.5 Modify-in-place
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

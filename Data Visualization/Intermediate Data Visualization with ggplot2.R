@@ -448,3 +448,123 @@ ggplot(mtcars, aes(wt, mpg)) +
     geom_point() +
     # Facet rows by am and columns by cyl using formula notation
     facet_grid(am ~ cyl)
+
+##### labeling facets #####
+
+# Plot wt by mpg
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    # The default is label_value
+    facet_grid(cols = vars(cyl),
+               labeller = label_both)
+
+# Plot wt by mpg
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    # The default is label_value
+    facet_grid(cols = vars(cyl),
+               labeller = label_context)
+
+# Plot wt by mpg
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    # Two variables
+    facet_grid(cols = vars(vs, cyl), labeller = label_context)
+
+##### Setting Order #####
+
+# Make factor, set proper labels explictly
+mtcars$fam <- factor(mtcars$am, labels = c(`0` = "automatic",
+                                           `1` = "manual"))
+
+# Default order is alphabetical
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    facet_grid(cols = vars(fam))
+
+# Make factor, set proper labels explictly, and
+# manually set the label order
+mtcars$fam <- factor(mtcars$am,
+                     levels = c(1, 0),
+                     labels = c(`1` = "manual",`0` = "automatic"))
+
+# View again
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    facet_grid(cols = vars(fam))
+
+##### Variable plotting spaces 1: continuous spaces #####
+
+# Fixed scales
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() + 
+    # Facet columns by cyl 
+    facet_grid(cols = vars(cyl))
+
+# Free x-axis scales 
+
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() + 
+    # Facet columns by cyl 
+    facet_grid(cols = vars(cyl),
+               scales = "free_x")
+
+# Facet the rows by 'cyl' and free the y-axis
+
+ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() + 
+    # Swap cols for rows; free the y-axis scales
+    facet_grid(rows = vars(cyl), 
+               scales = "free_y")
+
+##### Variable plotting spaces 2: Categorical Variables #####
+
+# in practice, the facet behavior works the same with numerical and categorical variables.
+
+ggplot(mtcars, aes(x = mpg, y = car, color = fam)) +
+    geom_point() +
+    # Facet rows by gear
+    facet_grid(rows = vars(gear))
+
+ggplot(mtcars, aes(x = mpg, y = car, color = fam)) +
+    geom_point() +
+    # Facet rows by gear
+    facet_grid(rows = vars(gear),
+               scales = "free_y",
+               space = "free_y")
+
+##### Wrapping for many levels #####
+
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+    stat_smooth(method = "lm", se = FALSE) +
+    # Create facets, wrapping by year, using vars()
+    facet_wrap(vars(year))
+
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+    stat_smooth(method = "lm", se = FALSE) +
+    # Create facets, wrapping by year, using vars()
+    facet_wrap(~ year)
+
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+    stat_smooth(method = "lm", se = FALSE) +
+    # Create facets, wrapping by year, using vars()
+    facet_wrap(~ year,
+               ncol = 11)
+
+##### Margin Plots #####
+ggplot(mtcars, aes(x = wt, y = mpg)) + 
+    geom_point() +
+    # Facet rows by fvs and cols by fam
+    facet_grid(gear ~ fvs + fam)
+
+ggplot(mtcars, aes(x = wt, y = mpg)) + 
+    geom_point() +
+    # Update the facets to add margins
+    facet_grid(rows = vars(fvs), cols = vars(fam))
+
+ggplot(mtcars, aes(x = wt, y = mpg)) + 
+    geom_point() +
+    # Update the facets to add margins
+    facet_grid(rows = vars(fvs, fam), 
+               cols = vars(gear), 
+               margins = TRUE)
