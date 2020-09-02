@@ -236,9 +236,9 @@ b[[1]]</code></pre>
 y &lt;- x
 
 obj_addr(x)</code></pre>
-<pre><code>## [1] &quot;0x7f84ef0f59b8&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe395a79608&quot;</code></pre>
 <pre class="r"><code>obj_addr(y)</code></pre>
-<pre><code>## [1] &quot;0x7f84ef0f59b8&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe395a79608&quot;</code></pre>
 <div id="non-syntactic-names" class="section level3">
 <h3>2.2.1 Non-syntactic Names</h3>
 <p>Non-syntactic names are names that:</p>
@@ -268,15 +268,15 @@ d &lt;- 1:10</code></pre>
 <h4>Question 2</h4>
 <p><em>The following code accesses the mean function in multiple ways. Do they all point to the same underlying function object? Verify this with <code>lobstr::obj_addr()</code></em>.</p>
 <pre class="r"><code>obj_addr(mean)</code></pre>
-<pre><code>## [1] &quot;0x7f84ee916598&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe394681998&quot;</code></pre>
 <pre class="r"><code>obj_addr(base::mean)</code></pre>
-<pre><code>## [1] &quot;0x7f84ee916598&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe394681998&quot;</code></pre>
 <pre class="r"><code>obj_addr(get(&quot;mean&quot;))</code></pre>
-<pre><code>## [1] &quot;0x7f84ee916598&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe394681998&quot;</code></pre>
 <pre class="r"><code>obj_addr(evalq(mean))</code></pre>
-<pre><code>## [1] &quot;0x7f84ee916598&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe394681998&quot;</code></pre>
 <pre class="r"><code>obj_addr(match.fun(&quot;mean&quot;))</code></pre>
-<pre><code>## [1] &quot;0x7f84ee916598&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe394681998&quot;</code></pre>
 <p>Yes, <code>obj_addr</code> calls the same <strong>mean</strong> object.</p>
 </div>
 <div id="question-3-1" class="section level4">
@@ -294,12 +294,12 @@ d &lt;- 1:10</code></pre>
 y &lt;- x
 
 obj_addr(x)</code></pre>
-<pre><code>## [1] &quot;0x7f84eea0f9d8&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe391a5a018&quot;</code></pre>
 <pre class="r"><code>obj_addr(y)</code></pre>
-<pre><code>## [1] &quot;0x7f84eea0f9d8&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe391a5a018&quot;</code></pre>
 <pre class="r"><code>y[[3]] &lt;- 4
 obj_addr(y)</code></pre>
-<pre><code>## [1] &quot;0x7f84ece4da08&quot;</code></pre>
+<pre><code>## [1] &quot;0x7fe38fc360b8&quot;</code></pre>
 <p>Notice how x and y have the same address initially? This is because the line <code>x &lt;- c(1,2,3)</code> creates a vector of 1, 2, and 3 then binds it x. The next line, <code>y &lt;- x</code>, binds the same vector to y. Essentially, the vector of 1, 2, and 3 has TWO names it can be called by now. Once I make a modification, line <code>y[[3]] &lt;- 4</code>, R creates a new vector of 1, 2, and 4 and binds that vector to y. This behavior is called <strong>copy-on-modify</strong>.</p>
 <div id="tracemem" class="section level3">
 <h3>2.3.1 tracemem()</h3>
@@ -307,10 +307,10 @@ obj_addr(y)</code></pre>
 <p>Consider the following code:</p>
 <pre class="r"><code>x &lt;- c(1, 2, 3)
 cat(tracemem(x), &quot;\n&quot;)</code></pre>
-<pre><code>## &lt;0x7f84ef0f3ca8&gt;</code></pre>
+<pre><code>## &lt;0x7fe3952659d8&gt;</code></pre>
 <pre class="r"><code>y &lt;- x
 y[[3]] &lt;- 4</code></pre>
-<pre><code>## tracemem[0x7f84ef0f3ca8 -&gt; 0x7f84ecad18d8]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
+<pre><code>## tracemem[0x7fe3952659d8 -&gt; 0x7fe395b065d8]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
 <p>Notice how it states [location] -&gt; [location]? This is telling me that R has made a copy and where it's new address is.</p>
 <p>Also make sure to use the <code>untracemem()</code> function, or I'll keep getting the address calls.</p>
 <pre class="r"><code>untracemem(x)</code></pre>
@@ -324,7 +324,7 @@ y[[3]] &lt;- 4</code></pre>
 
 x &lt;- c(1,2,3)
 cat(tracemem(x), &quot;\n&quot;)</code></pre>
-<pre><code>## &lt;0x7f84f084a6d8&gt;</code></pre>
+<pre><code>## &lt;0x7fe395a248f8&gt;</code></pre>
 <pre class="r"><code>z &lt;- f(x)
 
 untracemem(x)</code></pre>
@@ -336,23 +336,23 @@ untracemem(x)</code></pre>
 <pre class="r"><code>l1 &lt;- list(1, 2, 3)
 l2 &lt;- l1
 ref(l1, l2)</code></pre>
-<pre><code>## █ [1:0x7f84ea9d81b8] &lt;list&gt; 
-## ├─[2:0x7f84eaa05140] &lt;dbl&gt; 
-## ├─[3:0x7f84eaa050d0] &lt;dbl&gt; 
-## └─[4:0x7f84eaa05098] &lt;dbl&gt; 
+<pre><code>## █ [1:0x7fe38fbdfe98] &lt;list&gt; 
+## ├─[2:0x7fe39156e258] &lt;dbl&gt; 
+## ├─[3:0x7fe39156e220] &lt;dbl&gt; 
+## └─[4:0x7fe39156e1e8] &lt;dbl&gt; 
 ##  
-## [1:0x7f84ea9d81b8]</code></pre>
+## [1:0x7fe38fbdfe98]</code></pre>
 <pre class="r"><code>l2[[3]] &lt;- 4
 ref(l1, l2)</code></pre>
-<pre><code>## █ [1:0x7f84ea9d81b8] &lt;list&gt; 
-## ├─[2:0x7f84eaa05140] &lt;dbl&gt; 
-## ├─[3:0x7f84eaa050d0] &lt;dbl&gt; 
-## └─[4:0x7f84eaa05098] &lt;dbl&gt; 
+<pre><code>## █ [1:0x7fe38fbdfe98] &lt;list&gt; 
+## ├─[2:0x7fe39156e258] &lt;dbl&gt; 
+## ├─[3:0x7fe39156e220] &lt;dbl&gt; 
+## └─[4:0x7fe39156e1e8] &lt;dbl&gt; 
 ##  
-## █ [5:0x7f84ec065d08] &lt;list&gt; 
-## ├─[2:0x7f84eaa05140] 
-## ├─[3:0x7f84eaa050d0] 
-## └─[6:0x7f84eaa04f10] &lt;dbl&gt;</code></pre>
+## █ [5:0x7fe391963a48] &lt;list&gt; 
+## ├─[2:0x7fe39156e258] 
+## ├─[3:0x7fe39156e220] 
+## └─[6:0x7fe39156e028] &lt;dbl&gt;</code></pre>
 <p>The schematic looks a bit interesting, but lets walk through it. First, when I bind the list of <code>list(1,2,3)</code> to l1 and l2, all the elements of those lists are in the same location. When I make a modification, look what happens. Only the third element of list <code>l2</code> changes address. This is because it has been modified.</p>
 </div>
 <div id="data-frames" class="section level3">
@@ -361,33 +361,33 @@ ref(l1, l2)</code></pre>
 <pre class="r"><code>d1 &lt;- data.frame(x = c(1, 5, 6), y = c(2, 4, 3))
 d2 &lt;- d1
 ref(d1, d2)</code></pre>
-<pre><code>## █ [1:0x7f84e9266b48] &lt;df[,2]&gt; 
-## ├─x = [2:0x7f84e9b6f5a8] &lt;dbl&gt; 
-## └─y = [3:0x7f84e9b6f2d8] &lt;dbl&gt; 
+<pre><code>## █ [1:0x7fe391158b88] &lt;df[,2]&gt; 
+## ├─x = [2:0x7fe39405c088] &lt;dbl&gt; 
+## └─y = [3:0x7fe39405c858] &lt;dbl&gt; 
 ##  
-## [1:0x7f84e9266b48]</code></pre>
+## [1:0x7fe391158b88]</code></pre>
 <pre class="r"><code>d2[, 2] &lt;- d2[, 2] * 2
 ref(d1, d2)</code></pre>
-<pre><code>## █ [1:0x7f84e9266b48] &lt;df[,2]&gt; 
-## ├─x = [2:0x7f84e9b6f5a8] &lt;dbl&gt; 
-## └─y = [3:0x7f84e9b6f2d8] &lt;dbl&gt; 
+<pre><code>## █ [1:0x7fe391158b88] &lt;df[,2]&gt; 
+## ├─x = [2:0x7fe39405c088] &lt;dbl&gt; 
+## └─y = [3:0x7fe39405c858] &lt;dbl&gt; 
 ##  
-## █ [4:0x7f84ef8ed108] &lt;df[,2]&gt; 
-## ├─x = [2:0x7f84e9b6f5a8] 
-## └─y = [5:0x7f84f086aee8] &lt;dbl&gt;</code></pre>
+## █ [4:0x7fe39394f748] &lt;df[,2]&gt; 
+## ├─x = [2:0x7fe39405c088] 
+## └─y = [5:0x7fe3938bb058] &lt;dbl&gt;</code></pre>
 <p>The same result that we saw in the list example is occuring in this example.</p>
 <p>Now, the question is what happens if I modify every row instead of a single column? Let's find out:</p>
 <pre class="r"><code>d3 &lt;- d1
 d3[1, ] &lt;- d3[1, ] * 3
 
 ref(d1, d3)</code></pre>
-<pre><code>## █ [1:0x7f84e9266b48] &lt;df[,2]&gt; 
-## ├─x = [2:0x7f84e9b6f5a8] &lt;dbl&gt; 
-## └─y = [3:0x7f84e9b6f2d8] &lt;dbl&gt; 
+<pre><code>## █ [1:0x7fe391158b88] &lt;df[,2]&gt; 
+## ├─x = [2:0x7fe39405c088] &lt;dbl&gt; 
+## └─y = [3:0x7fe39405c858] &lt;dbl&gt; 
 ##  
-## █ [4:0x7f84ec0f7388] &lt;df[,2]&gt; 
-## ├─x = [5:0x7f84f0964e78] &lt;dbl&gt; 
-## └─y = [6:0x7f84ef065998] &lt;dbl&gt;</code></pre>
+## █ [4:0x7fe390b76f88] &lt;df[,2]&gt; 
+## ├─x = [5:0x7fe3910f2b18] &lt;dbl&gt; 
+## └─y = [6:0x7fe3910f2488] &lt;dbl&gt;</code></pre>
 <p>In this case, both fields in <code>d3</code> have been modified so they have new addresses.</p>
 </div>
 <div id="character-vectors" class="section level3">
@@ -395,11 +395,11 @@ ref(d1, d3)</code></pre>
 <p>R uses references with character vectors as well. Consider the following:</p>
 <pre class="r"><code>x &lt;- c(&quot;a&quot;, &quot;a&quot;, &quot;abc&quot;, &quot;d&quot;)
 ref(x, character = TRUE)</code></pre>
-<pre><code>## █ [1:0x7f84ea9d7d58] &lt;chr&gt; 
-## ├─[2:0x7f84e9047eb0] &lt;string: &quot;a&quot;&gt; 
-## ├─[2:0x7f84e9047eb0] 
-## ├─[3:0x7f84e90db048] &lt;string: &quot;abc&quot;&gt; 
-## └─[4:0x7f84e9948d70] &lt;string: &quot;d&quot;&gt;</code></pre>
+<pre><code>## █ [1:0x7fe395aedc78] &lt;chr&gt; 
+## ├─[2:0x7fe39106fab0] &lt;string: &quot;a&quot;&gt; 
+## ├─[2:0x7fe39106fab0] 
+## ├─[3:0x7fe3910703a8] &lt;string: &quot;abc&quot;&gt; 
+## └─[4:0x7fe394041d70] &lt;string: &quot;d&quot;&gt;</code></pre>
 <p>It is important to note that R actually has a <strong>global string pool</strong> that it binds variables to. That is why <code>&quot;a&quot;</code> has the same address for both elements.</p>
 </div>
 <div id="exercises-1" class="section level3">
@@ -409,9 +409,9 @@ ref(x, character = TRUE)</code></pre>
 <p><em>Why is <code>tracemem(1:10)</code> not useful?</em></p>
 <p><code>tracemem(1:10)</code> isn't useful because each time I run this code, a different vector of 1, 2, 3, ... , 10 is created. That would mean new addresses each time I ran it.</p>
 <pre class="r"><code>tracemem(1:10)</code></pre>
-<pre><code>## [1] &quot;&lt;0x7f84ee8c7c18&gt;&quot;</code></pre>
+<pre><code>## [1] &quot;&lt;0x7fe39465a160&gt;&quot;</code></pre>
 <pre class="r"><code>tracemem(1:10)</code></pre>
-<pre><code>## [1] &quot;&lt;0x7f84ece9f0f0&gt;&quot;</code></pre>
+<pre><code>## [1] &quot;&lt;0x7fe394704e80&gt;&quot;</code></pre>
 </div>
 <div id="question-2-2" class="section level4">
 <h4>Question 2</h4>
@@ -419,10 +419,10 @@ ref(x, character = TRUE)</code></pre>
 <p>Consider the code:</p>
 <pre class="r"><code>x &lt;- c(1L, 2L, 4L)
 tracemem(x)</code></pre>
-<pre><code>## [1] &quot;&lt;0x7f84ef0caac8&gt;&quot;</code></pre>
+<pre><code>## [1] &quot;&lt;0x7fe392a2f5c8&gt;&quot;</code></pre>
 <pre class="r"><code>x[[3]] &lt;- 4</code></pre>
-<pre><code>## tracemem[0x7f84ef0caac8 -&gt; 0x7f84ef06da48]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
-## tracemem[0x7f84ef06da48 -&gt; 0x7f84f097f968]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
+<pre><code>## tracemem[0x7fe392a2f5c8 -&gt; 0x7fe38ffcdb48]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe38ffcdb48 -&gt; 0x7fe38ffc08c8]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
 <pre class="r"><code>untracemem(x)</code></pre>
 <p>The reason for the change is I'm changing from an integer of <code>4L</code> to a double in <code>4</code>.</p>
 </div>
@@ -434,16 +434,16 @@ b &lt;- list(a, a)
 c &lt;- list(b, a, 1:10)
 
 ref(a, b, c)</code></pre>
-<pre><code>## [1:0x7f84ecd07200] &lt;int&gt; 
+<pre><code>## [1:0x7fe39500d468] &lt;int&gt; 
 ##  
-## █ [2:0x7f84eea80dc8] &lt;list&gt; 
-## ├─[1:0x7f84ecd07200] 
-## └─[1:0x7f84ecd07200] 
+## █ [2:0x7fe395a49b88] &lt;list&gt; 
+## ├─[1:0x7fe39500d468] 
+## └─[1:0x7fe39500d468] 
 ##  
-## █ [3:0x7f84eeab2678] &lt;list&gt; 
-## ├─[2:0x7f84eea80dc8] 
-## ├─[1:0x7f84ecd07200] 
-## └─[4:0x7f84ecafb3b0] &lt;int&gt;</code></pre>
+## █ [3:0x7fe394162418] &lt;list&gt; 
+## ├─[2:0x7fe395a49b88] 
+## ├─[1:0x7fe39500d468] 
+## └─[4:0x7fe390f8ffb8] &lt;int&gt;</code></pre>
 </div>
 <div id="question-4" class="section level4">
 <h4>Question 4</h4>
@@ -453,10 +453,10 @@ ref(a, b, c)</code></pre>
 x[[2]] &lt;- x
 
 ref(x)</code></pre>
-<pre><code>## █ [1:0x7f84eeb540c8] &lt;list&gt; 
-## ├─[2:0x7f84eebbfc40] &lt;int&gt; 
-## └─█ [3:0x7f84eebb2d98] &lt;list&gt; 
-##   └─[2:0x7f84eebbfc40]</code></pre>
+<pre><code>## █ [1:0x7fe392a00f48] &lt;list&gt; 
+## ├─[2:0x7fe395b3f200] &lt;int&gt; 
+## └─█ [3:0x7fe395b3deb0] &lt;list&gt; 
+##   └─[2:0x7fe395b3f200]</code></pre>
 <pre class="r"><code>x</code></pre>
 <pre><code>## [[1]]
 ##  [1]  1  2  3  4  5  6  7  8  9 10
@@ -547,6 +547,58 @@ obj_size(b)</code></pre>
 <pre class="r"><code>obj_size(a, b)</code></pre>
 <pre><code>## 24,000,208 B</code></pre>
 </div>
+</div>
+</div>
+<div id="modify-in-place" class="section level2">
+<h2>2.5 Modify-in-place</h2>
+<p>There are two exceptions to <code>modify-in-place</code>:</p>
+<ol style="list-style-type: decimal">
+<li>Objects with a single binding get a special performance optimization</li>
+<li>Environments, a special type of object, are always modified in place</li>
+</ol>
+<div id="objects-with-a-single-binding" class="section level3">
+<h3>2.5.1 Objects with a single binding</h3>
+<p>If an object has a single name bound to it, R will modify it in place:</p>
+<pre class="r"><code>v &lt;- c(1, 2, 3)
+cat(tracemem(v), &quot;\n&quot;)</code></pre>
+<pre><code>## &lt;0x7fe3964d0ac8&gt;</code></pre>
+<pre class="r"><code>v[[3]] &lt;- 4</code></pre>
+<pre><code>## tracemem[0x7fe3964d0ac8 -&gt; 0x7fe397310518]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
+<pre class="r"><code>untracemem(v)</code></pre>
+<p>There are two complications:</p>
+<ol style="list-style-type: decimal">
+<li><p>When it comes to binding, R can currently only count 0, 1, and many. This means if there are two bindings, and one goes away, there are still many because many - 1 is many. this means R will make copies when it sometimes doesn't need to.</p></li>
+<li><p>Whenever you call the vast majority of functions, it makes a reference to the object.</p></li>
+</ol>
+<p>These subtleties can be explored with using a case study:</p>
+<pre class="r"><code>x &lt;- data.frame(matrix(runif(5 * 1e4), ncol = 5))
+medians &lt;- vapply(x, median, numeric(1))
+
+cat(tracemem(x), &quot;\n&quot;)</code></pre>
+<pre><code>## &lt;0x7fe393aa1808&gt;</code></pre>
+<pre class="r"><code>for(i in seq_along(medians)){
+    x[[i]] &lt;- x[[i]] - medians[[i]]
+}</code></pre>
+<pre><code>## tracemem[0x7fe393aa1808 -&gt; 0x7fe38ffd7888]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe38ffd7888 -&gt; 0x7fe3960daf58]: [[&lt;-.data.frame [[&lt;- eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960daf58 -&gt; 0x7fe3960db7a8]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960db7a8 -&gt; 0x7fe3960db888]: [[&lt;-.data.frame [[&lt;- eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960db888 -&gt; 0x7fe3960dbd58]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960dbd58 -&gt; 0x7fe3960afaa8]: [[&lt;-.data.frame [[&lt;- eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960afaa8 -&gt; 0x7fe3960b0ad8]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe3960b0ad8 -&gt; 0x7fe39608a8a8]: [[&lt;-.data.frame [[&lt;- eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe39608a8a8 -&gt; 0x7fe39608ad08]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt; 
+## tracemem[0x7fe39608ad08 -&gt; 0x7fe39608ade8]: [[&lt;-.data.frame [[&lt;- eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
+<pre class="r"><code>untracemem(x)</code></pre>
+<p>The number of copies can be reduced by using a <code>list</code> instead of a <code>data.frame</code>.</p>
+<pre class="r"><code>y &lt;- as.list(x)
+cat(tracemem(y),&quot;\n&quot;)</code></pre>
+<pre><code>## &lt;0x7fe39639d6c8&gt;</code></pre>
+<pre class="r"><code>for(i in 1:5){
+    y[[i]] &lt;- y[[i]] - medians[[i]]
+}</code></pre>
+<pre><code>## tracemem[0x7fe39639d6c8 -&gt; 0x7fe3971ab708]: eval eval withVisible withCallingHandlers handle timing_fn evaluate_call &lt;Anonymous&gt; evaluate in_dir block_exec call_block process_group.block process_group withCallingHandlers process_file &lt;Anonymous&gt; &lt;Anonymous&gt;</code></pre>
+<pre class="r"><code>untracemem(y)</code></pre>
 </div>
 </div>
 </div>

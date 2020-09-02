@@ -435,6 +435,98 @@ obj_size(a, b)
 
 ## 2.5 Modify-in-place
 
+There are two exceptions to `modify-in-place`:
+
+1. Objects with a single binding get a special performance optimization
+2. Environments, a special type of object, are always modified in place
+
+### 2.5.1 Objects with a single binding
+
+If an object has a single name bound to it, R will modify it in place:
+
+```{r}
+
+v <- c(1, 2, 3)
+cat(tracemem(v), "\n")
+
+v[[3]] <- 4
+untracemem(v)
+
+```
+
+There are two complications:
+
+1. When it comes to binding, R can currently only count 0, 1, and many. This means if there are two bindings, and one goes away, there are still many because many - 1 is many. this means R will make copies when it sometimes doesn't need to.
+
+2. Whenever you call the vast majority of functions, it makes a reference to the object.
+
+These subtleties can be explored with using a case study:
+
+```{r}
+
+x <- data.frame(matrix(runif(5 * 1e4), ncol = 5))
+medians <- vapply(x, median, numeric(1))
+
+cat(tracemem(x), "\n")
+
+for(i in seq_along(medians)){
+    x[[i]] <- x[[i]] - medians[[i]]
+}
+
+untracemem(x)
+
+```
+
+The number of copies can be reduced by using a `list` instead of a `data.frame`.
+
+```{r}
+
+y <- as.list(x)
+cat(tracemem(y),"\n")
+
+for(i in 1:5){
+    y[[i]] <- y[[i]] - medians[[i]]
+}
+
+untracemem(y)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
