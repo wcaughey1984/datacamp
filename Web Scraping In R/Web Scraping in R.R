@@ -407,3 +407,422 @@ code_html %>%
 # Select all code elements in the second example
 code_html %>%
 	html_nodes("h2.second ~ code")
+
+##### Introduction to XPATH #####
+
+# XPATH = XML path language
+# This is a different pathway than the CSS pathway
+# Can go down AND up the HTML tree
+
+# Suppose I want to select the element 'p' nodes...
+# CSS: html %>% html_nodes('p')
+# XPATH: html %>% html_nodes(xpath = "//p")
+
+# Using the same example... the path would be...
+# CSS: html %>% html_nodes("body p") OR html %>% html_nodes("html > body p")
+# XPATH: html %>% html_nodes("//body//p") OR html %>% html_nodes("/html/body//p")
+
+# Suppose I want to select 'p' tacks that direct children of 'div' tacks...
+# CSS: html %>% html_nodes("div > p")
+# XPATH: html %>% html_nodes("//div/p")
+
+# Suppose I want to select 'div' tacks that only have an 'a' tack child...
+# CSS: There is not a way to do this...
+# XPATH: html %>% html_nodes("div[a]")
+
+# Syntax of XPATH
+# Axes: '/' or '//'; '/' is direct child; '//' general descendent relationship
+# Steps: HTML types like 'span' and 'a'
+# Predicates: [...]
+
+##### Select by class and ID with XPATH #####
+
+weather_html_raw <- "
+<html>
+  <body>
+    <div id = 'first'>
+      <h1 class = 'big'>Berlin Weather Station</h1>
+      <p class = 'first'>Temperature: 20°C</p>
+      <p class = 'second'>Humidity: 45%</p>
+    </div>
+    <div id = 'second'>...</div>
+    <div id = 'third'>
+      <p class = 'first'>Sunshine: 5hrs</p>
+      <p class = 'second'>Precipitation: 0mm</p>
+    </div>
+  </body>
+</html>"
+
+weather_html <- read_html(weather_html_raw)
+
+# Select all p elements
+weather_html %>%
+	html_nodes(xpath = '//p')
+
+# Select p elements with the second class
+weather_html %>%
+	html_nodes(xpath = "//p[@class = 'second']")
+
+# Select p elements that are children of "#third"
+weather_html %>%
+	html_nodes(xpath = "//div[@id = 'third']")
+
+# Select p elements with class "second" that are children of "#third"
+weather_html %>%
+	html_nodes(xpath = "//div[@id = 'third']//p[@class = 'second']")
+
+##### Use predicates to select nodes based on their chidlren #####
+
+# Select all divs
+weather_html %>%
+    html_nodes(xpath = "//div")
+
+# Select all divs with p descendants
+weather_html %>%
+    html_nodes(xpath = '//div[p]')
+
+# Select all divs with p descendants having the "third" class
+weather_html %>%
+    html_nodes(xpath = "//div[p[@class = 'third']]") # This reaches down TWO layers
+
+##### XPATH functions and advanced predicates #####
+
+# position() : selects the nth element
+# CSS: html %>% html_nodes(css = "ol > li:nth-child(2)")
+# XPATH: html %>% html_nodes(xpath = "//ol/li[position() = 2]")
+
+# Now suppose I want to get the first two elements... This can't be done in CSS, but with XPATH...
+# html %>% html_nodes(xpath = "//ol/li[position() < 3]")
+
+# Now suppose i want all the elements except for the third... again, CSS can't do this... but with XPATH...
+# html %>% html_nodes(xpath = "//ol/li[position() != 3]")
+
+# Now suppose I want all the elements except for the third BUT they need to have class blue...
+# html %>% html_nodes(xpath = "//ol/li[position() != 3 and @class = 'blue']")
+
+# count() : we can select the nodes with a specific number of children
+# html %>% html_nodes(xpath = "//ol[count(li) = 2]")
+
+##### Get to know the position() function #####
+
+rules_html_raw <- "
+<body>
+<div>
+    <h2>Today's rules</h2>
+    <p>Wear a mask</p>
+    <p>Wash your hands</p>
+</div>
+<div>
+    <h2>Tomorrow's rules</h2>
+    <p>Wear a mask</p>
+    <p>Wash your hands</p>
+    <p>Bring hand sanitizer with you</p>
+</div>
+</body>"
+
+rules_html <- read_html(rules_html_raw)
+
+# Select the text of the second p in every div
+rules_html %>%
+    html_nodes(xpath = "//div/p[position() = 2]") %>%
+    html_text()
+
+# Select every p except the second from every div
+rules_html %>%
+    html_nodes(xpath = "//div/p[position() != 2]") %>%
+    html_text()
+
+# Select the text of the last three nodes of the second div
+rules_html %>%
+    html_nodes(xpath = "//div[count(p) = 3]/p") %>%
+    html_text()
+
+##### Extract nodes based on the number of their children #####
+
+forecast_html_raw <- "
+<body>
+<div>
+  <h1>Tomorrow</h1>
+</div>
+<div>
+  <h2>Berlin</h2>
+  <p>Temperature: 20°C</p>
+  <p>Humidity: 50%</p>
+</div>
+<div>
+  <h2>London</h2>
+  <p>Temperature: 15°C</p>
+</div>
+<div>
+  <h2>Zurich</h2>
+  <p>Temperature: 22°C</p>
+  <p>Humidity: 60%</p>
+</div>
+</body>"
+
+forecast_html <- read_html(forecast_html_raw)
+
+# Select only divs with one header and at least one paragraph
+forecast_html %>%
+	html_nodes(xpath = "//div[count(h2) = 1 and count(p) > 1]")
+
+##### The XPATH text() function #####
+
+actor_html_raw <-'
+<html>
+<body>
+    <table id = "cast">
+        <tr><td class = "actor">Arnold S.</td><td class = "role"><em>1</em> (Voice)</td></tr>
+        <tr><td class = "actor">Burt R.</td><td class = "role"><em>2</em> (Choreo)</td></tr>
+        <tr><td class = "actor">Charlize T.</td><td class = "role"><em>3</em> (Voice)</td></tr>
+    </table>
+</body>
+</html>
+'
+
+actor_html <- read_html(actor_html_raw)
+
+# suppose I want to access the emphasis elements and not the role. This is impossible in CSS.
+# The closest I can get is:
+
+actor_html %>%
+    html_nodes("#cast td.role") %>%
+    html_text()
+
+# this can be done in XPATH
+
+actor_html %>%
+    html_nodes(xpath = '//*[@id = "cast"]//td[@class = "role"]') %>% # equal to '#cast td.role'
+    html_nodes(xpath = "./text()") %>% # This only selects text from the "td" element pulled in the line previous
+    html_text(trim = T)
+
+# The text() function can do something else: act as a selector by text
+# Suppose I am only interest in pulling the rows where the actor gave the character it's voice
+
+actor_html %>%
+    html_nodes(xpath = '//*[@id = "cast"]//td[@class = "role" and text() = " (Voice)"]')
+
+# Now, I want to select the entire row... I can use the 'parent' filter to pull the entire 'tr' element
+actor_html %>%
+    html_nodes(xpath = '//*[@id = "cast"]//td[@class = "role" and text() = " (Voice)"]') %>%
+    html_nodes(xpath = '..')
+
+##### The shortcomings of html_table() with badly structured tables #####
+
+roles_html_raw <- '
+<table>
+ <tr>
+  <th>Actor</th>
+  <th>Role</th>
+ </tr>
+ <tr>
+  <td class = "actor">Jayden Carpenter</td>
+  <td class = "role"><em>Mickey Mouse</em> (Voice)</td>
+ </tr>
+ ...
+</table>'
+
+roles_html <- read_html(roles_html_raw)
+
+# Extract the data frame from the table using a known function from rvest
+roles <- roles_html %>%
+  html_node(xpath = "//table") %>%
+  html_table()
+# Print the contents of the role data frame
+print(roles)
+
+##### Select directly from a parent element with XPATHs text() #####
+
+# Extract the actors in the cells having class "actor"
+actors <- roles_html %>%
+  html_nodes(xpath = '//table//td[@class = "actor"]') %>%
+  html_text()
+actors
+
+# Extract the roles in the cells having class "role"
+roles <- roles_html %>%
+  html_nodes(xpath = '//table//td[@class = "role"]/em') %>%
+  html_text()
+roles
+
+# Extract the functions using the appropriate XPATH function
+functions <- roles_html %>%
+  html_nodes(xpath = '//table//td[@class = "role"]/text()') %>%
+  html_text(trim = TRUE)
+functions
+
+##### Combine extracted data into a data frame #####
+
+# Create a new data frame from the extracted vectors
+cast <- tibble(
+  Actor = actors,
+  Role = roles,
+  Function = functions)
+
+cast
+
+##### Scrape an element based on its text ####
+
+programming_html_raw <- "
+<body>
+<h3>The rules of programming</h3>
+<ol>
+  <li>Have <em>fun</em>.</li>
+  <li><strong>Don't</strong> repeat yourself.</li>
+  <li>Think <em>twice</em> when naming variables.</li>
+</ol>
+</body>"
+
+programming_html <- read_html(programming_html_raw)
+
+# Select all li elements
+programming_html %>%
+	html_nodes(xpath = '//li')
+
+# Select all li elements
+programming_html %>%
+	html_nodes(xpath = '//li') %>%
+	# Select all em elements within li elements that have "twice" as text
+	html_nodes(xpath = '//em[text() = "twice"]')
+
+# Select all li elements
+programming_html %>%
+	html_nodes(xpath = '//li') %>%
+	# Select all em elements within li elements that have "twice" as text
+	html_nodes(xpath = 'em[text() = "twice"]') %>%
+	# Wander up the tree to select the parent of the em
+    html_nodes(xpath = "..")
+
+##### The nature of HTTP requests #####
+
+# GET() : used to fetch a resource without submitting data
+# POST() : Used to send data to a server, e.g. after filling out a form on a page
+
+# With the httr library, I can send HTTP requests from my R session
+library(httr)
+GET('https://httpbin.org')
+
+# What I got from the website was the HTML code from the website. I can save this in a variable 'response'.
+# Using the 'content' function, I can get the HTML code of the website
+response <- GET('https://httpbin.org')
+content(response)
+
+##### Do it the httr way #####
+
+# Get the HTML document from Wikipedia using httr
+wikipedia_response <- GET('https://en.wikipedia.org/wiki/Varigotti')
+# Check the status code of the response
+status_code(wikipedia_response)
+# Parse the response into an HTML doc
+wikipedia_page <- content(wikipedia_response)
+wikipedia_page
+# Extract the altitude with XPATH
+wikipedia_page %>%
+	html_nodes(xpath = '//table//tr[count(preceding-sibling::*)=8]/td') %>%
+	html_text()
+
+wikipedia_page %>%
+	html_nodes(xpath = '//table//tr[position()=9]/td') %>%
+	html_text()
+
+##### Houston, we got a 404 #####
+
+response <- GET('https://en.wikipedia.org/wiki/Varigott')
+# Print status code of inexistent page
+status_code(response)
+
+##### Telling who you are with custom user agents #####
+
+# When scraping the web, use my email address so they know who scrapes it
+
+# Modify headers wtih httr
+response <- GET('http://example.com',
+                user_agent = "Hey, its me, Timo! Reach me at timo@timogrossenbacher.ch.")
+
+# I can make the user_agent 'standard'
+set_config(add_headers(`User Agent` = "Hey, it's me, Timo! Reach me at timo@timogrossenbacher.chc."))
+response <- GET("http://example.com")
+
+##### Check out your user agent #####
+
+# Access https://httpbin.org/headers with httr
+response <- GET("https://httpbin.org/headers")
+# Print its content
+print(content(response))
+
+##### Add a customer user agent #####
+
+# Pass a custom user agent to a GET query to the mentioned URL
+response <- GET("https://httpbin.org/user-agent",
+                config = user_agent("A request form a DataCamp course on scraping"))
+# Print the response content
+print(content(response))
+
+# Globally set the user agent to "A request from a DataCamp course on scraping"
+set_config(add_headers(`User-Agent` = "A request form a DataCamp course on scraping"))
+# Pass a custom user agent to a GET query to the mentioned URL
+response <- GET("https://httpbin.org/user-agent")
+# Print the response content
+content(response)
+
+##### How to be gentle and slow down your requests #####
+
+# Throttling: scraping multiple websites right after one another after a lag
+
+# while(T){
+#     print(Sys.time())
+#     response <- GET("https://httpbin.org")
+#     print(status_code(response))
+# }
+
+# a nicer way of requesting data from websites
+
+# user the 'purrr' library to slow down requests
+library(purrr)
+throttled_GET <- slowly(~ GET("https://httpbin.org"),
+                        rate = rate_delay(3)) # Delays each call by 3 seconds
+
+# This call is hard coded and can't adjust very well. So, to adjust... use this:
+throttled_GET <- slowly(GET(.),
+                        rate = rate_delay(3))
+
+# The dot will allow me to do this: throttled_GET(website).
+# I can now interchange websites without hardcoding
+
+##### Custom arguments for throttled functions #####
+
+# Why is wikipedia printed instead of Google?
+
+throttled_read_html <- slowly(~ read_html("https://wikipedia.org"),
+                    rate = rate_delay(0.5))
+
+for(i in c(1, 2, 3)){
+  throttled_read_html("https://google.com") %>%
+      html_node("title") %>%
+      html_text() %>%
+    print()
+}
+
+##### Apply throttling to a multipage crawler #####
+
+# Define a throttled read_html() function with a delay of 0.5s
+read_html_delayed <- slowly(~ read_html("https://en.wikipedia.org/w/index.php?title=K2&oldid=956671989"),
+                            rate = rate_delay(0.5))
+
+# Construct a loop that goes over all page urls
+for(page_url in mountain_wiki_pages){
+  # Read in the html of each URL with a delay of 0.5s
+  html <- read_html_delayed(page_url)
+}
+
+# Construct a loop that goes over all page urls
+for(page_url in mountain_wiki_pages){
+   # Read in the html of each URL with a delay of 0.5s
+  html <- read_html_delayed(page_url)
+  # Extract the name of the peak and its coordinates
+  peak <- html %>%
+  	html_nodes("h1.firstHeading") %>% html_text()
+  coords <- html %>%
+    html_nodes("#coordinates .geo-dms") %>% html_text()
+  print(paste(peak, coords, sep = ": "))
+}
