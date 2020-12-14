@@ -339,30 +339,182 @@ gap2007 %>%
 
 ##### Measures of Variability #####
 
+# choose to decide the center is the mean
+# Var(x) = sum((x - mean(x))^2) / (n - 1)
+# sd(x) = sqrt(var(x))
+# IQR(x) = q3 - q1
+# Range(x) = max(x) - min(x)
+
+# Most commonly used statistics is the sd(x)
+# Var(x) and sd(x) are sensitive to outliers since they are based on averages
+# IQR(x) is less sensitive to outliers
+
+##### Calculate spread measures #####
+
+# Compute groupwise measures of spread
+gap2007 %>%
+  group_by(continent) %>%
+  summarize(sd(lifeExp),
+            IQR(lifeExp),
+            n())
+
+# Generate overlaid density plots
+gap2007 %>%
+  ggplot(aes(x = lifeExp, fill = continent)) +
+  geom_density(alpha = 0.3)
+
+##### Choose measures for center and spread #####
+
+# Compute stats for lifeExp in Americas
+gap2007 %>%
+  filter(continent == "Americas") %>%
+  summarize(mean(lifeExp),
+            sd(lifeExp))
+
+# Compute stats for population
+gap2007 %>%
+  summarize(median(pop),
+            IQR(pop))
+
+##### Shape and Transformations #####
+
+# Center
+# Spread
+# Shape: modality (number of humps)
+# Skew: Look for the tail (Right Tail, Left Tail, Symmetric)
+
+# If there is a tail, I can use the log(x) transformation
+
+##### Transformations #####
+
+# Create density plot of old variable
+gap2007 %>%
+  ggplot(aes(x = pop)) +
+  geom_density()
+
+# Transform the skewed pop variable
+gap2007 <- gap2007 %>%
+  mutate(log_pop = log(pop))
+
+# Create density plot of new variable
+gap2007 %>%
+  ggplot(aes(x = log_pop)) +
+  geom_density()
+
+##### Outliers #####
+
+# Outliers: Have extreme values from the bulk of information
+# When I see a tail in density plot, use a comparative boxplot 
+# It is good to consider outliers away from the distribution 
+
+##### Identifying Outliers #####
+
+# Filter for Asia, add column indicating outliers
+gap_asia <- gap2007 %>%
+  filter(continent == "Asia") %>%
+  mutate(is_outlier = (lifeExp < 50))
+
+# Remove outliers, create box plot of lifeExp
+gap_asia %>%
+  filter(!is_outlier) %>%
+  ggplot(aes(x = 1, y = lifeExp)) +
+  geom_boxplot()
+
+##### Introducting the data #####
+
+# What characteristics of an email are indicators if an email is spam?
+# Visuals: histograms, boxplots
+
+##### Spam and num_char #####
+
+# Load packages
+
+library(ggplot2)
+library(dplyr)
+library(openintro)
+
+# Compute summary statistics
+email %>%
+  group_by(spam) %>%
+  summarize(median(num_char),
+            IQR(num_char))
+
+# Create plot
+email %>%
+  mutate(log_num_char = log(num_char)) %>%
+  ggplot(aes(x = spam, y = log_num_char)) +
+  geom_boxplot()
+
+##### Spam and num_char interpretation #####
+
+# what did I learn from the boxplots?
+# the median of non-spam emails are longer than spam emails
+
+##### Spam and !!! #####
+
+# Compute center and spread for exclaim_mess by spam
+
+email %>%
+    group_by(spam) %>%
+    summarize(median(exclaim_mess),
+              IQR(exclaim_mess))
+
+# Create plot for spam and exclaim_mess
+
+email %>%
+    mutate(log_exclaim_mess = log(exclaim_mess + 0.01)) %>%
+    ggplot(aes(x = log_exclaim_mess)) +
+    geom_histogram() +
+    facet_wrap(~ spam)
+
+##### Check-in 1 #####
+
+# Zero inflation
+# Analyze two components seperates (0 vs non-0)
+# Categorize the zero inflation 
+
+##### Collapsing Levels #####
+
+# Create plot of proportion of spam by image
+email %>%
+  mutate(has_image = image > 0) %>%
+  ggplot(aes(x = has_image, fill = spam)) +
+  geom_bar(position = "fill")
+
+##### Data Integrity #####
+
+# Test if images count as attachments
+sum(email$image > email$attach)
 
 
+##### Answering questions with chains #####
 
+# Question 1
+email %>%
+  filter(dollar > 0) %>%
+  group_by(spam) %>%
+  summarize(median(num_char),
+            mean(num_charr))
 
+# Question 2
+email %>%
+  filter(dollar > 10) %>%
+  ggplot(aes(x = spam)) +
+  geom_bar()
 
+##### Check-in 2 #####
 
+##### What's in a number? #####
 
+# Reorder levels
+email$number_reordered <- factor(email$number, levels = c('none', 'small', 'big'))
 
+# Construct plot of number_reordered
+ggplot(email, aes(x = number_reordered)) +
+  geom_bar() +
+  facet_wrap(~ spam)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+##### What's in a number interpretation #####
 
 
 
