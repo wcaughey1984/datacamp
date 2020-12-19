@@ -196,7 +196,8 @@ akl_hourly  <- akl_hourly_raw  %>%
 akl_hourly <- akl_hourly  %>%
   mutate(
     datetime_string = paste(date, time, sep = "T"),
-    #datetime = as_date(datetime_string) -- This probably was working but wasn't producing the correct answers
+    #datetime = as_date(datetime_string)
+    #This probably was working but wasn't producing the correct answers
     datetime = ymd_hms(datetime_string)
   )
 
